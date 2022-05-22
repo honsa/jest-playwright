@@ -4,6 +4,12 @@
 [![Coverage Status](https://coveralls.io/repos/github/mmarkelov/jest-playwright/badge.svg?branch=master)](https://coveralls.io/github/mmarkelov/jest-playwright?branch=master)
 ![npm](https://img.shields.io/npm/v/jest-playwright-preset)
 
+## ⚠️ We recommend the official [Playwright test-runner (@playwright/test)](https://playwright.dev/docs/test-intro) ⚠️
+
+It's more flexible, lightweight, optimized for Playwright, and has TypeScript support out of the box. This doesn't mean, that we stop with maintaining this package.
+
+---
+
 Running your tests using [Jest](https://github.com/facebook/jest) & [Playwright](https://github.com/microsoft/playwright)
 
 ```bash
@@ -132,6 +138,7 @@ module.exports = {
 - `serverOptions` <[object]>. [All `jest-process-manager` options](https://github.com/playwright-community/jest-process-manager#options).
 - `selectors` <[array]>. Define [selectors](https://playwright.dev/docs/api/class-selectors/). Each selector must be an object with name and script properties.
 - `skipInitialization` <[boolean]>. Add you ability to skip first setup `playwright` process. Possible use cases can be found [here](https://github.com/playwright-community/jest-playwright/issues/424)
+- `resetContextPerTest` <[boolean]>. Option for opening a new context per test
 - `useDefaultBrowserType` <[boolean]>. [Sometimes](https://github.com/microsoft/playwright/issues/2787) `browser` + `device` combinations don't have any sense. With this option tests will be run with [`defaultBrowserType`](https://github.com/microsoft/playwright/pull/3731) of device. Pay attention that you should define **devices** to correct usage of this option.
 
 ### Usage of process environment to define browser

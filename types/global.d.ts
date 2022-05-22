@@ -4,6 +4,8 @@ import {
   Page,
   BrowserContextOptions,
   LaunchOptions,
+  ConnectOptions,
+  ConnectOverCDPOptions,
   BrowserType as PlaywrightBrowserType,
   ViewportSize,
   ChromiumBrowser,
@@ -12,12 +14,13 @@ import {
   devices,
 } from 'playwright-core'
 import { Config as JestConfig } from '@jest/types'
-import { Context } from 'jest-runner/build/types'
 import { Test } from 'jest-runner'
 import { JestProcessManagerOptions } from 'jest-process-manager'
 
 // TODO Find out flex ways to reuse constants
 declare const IMPORT_KIND_PLAYWRIGHT = 'playwright'
+
+declare const CONFIG_ENVIRONMENT_NAME = 'jest-playwright'
 
 declare const CHROMIUM = 'chromium'
 declare const FIREFOX = 'firefox'
@@ -38,6 +41,12 @@ export type BrowserType = typeof CHROMIUM | typeof FIREFOX | typeof WEBKIT
 export type SkipOption = {
   browsers: BrowserType[]
   devices?: string[] | RegExp
+}
+
+type Global = typeof globalThis
+
+export interface JestPlaywrightGlobal extends Global {
+  [CONFIG_ENVIRONMENT_NAME]: JestPlaywrightConfig
 }
 
 export interface TestPlaywrightConfigOptions extends JestPlaywrightConfig {
@@ -192,8 +201,6 @@ type LaunchType = typeof LAUNCH | typeof SERVER | typeof PERSISTENT
 
 type Options<T> = T & Partial<Record<BrowserType, T>>
 
-export type ConnectOptions = Parameters<GenericBrowser['connect']>[0]
-
 export type ServerOptions = JestProcessManagerOptions & {
   teardown?: string
 }
@@ -201,10 +208,12 @@ export type ServerOptions = JestProcessManagerOptions & {
 export interface JestPlaywrightConfig {
   haveSkippedTests?: boolean
   skipInitialization?: boolean
+  resetContextPerTest?: boolean
+  testTimeout?: number
   debugOptions?: JestPlaywrightConfig
   launchType?: LaunchType
   launchOptions?: Options<LaunchOptions>
-  connectOptions?: Options<ConnectOptions>
+  connectOptions?: Options<ConnectOptions | ConnectOverCDPOptions>
   contextOptions?: Options<BrowserContextOptions>
   userDataDir?: string
   exitOnPageError?: boolean
@@ -217,18 +226,17 @@ export interface JestPlaywrightConfig {
   collectCoverage?: boolean
 }
 
-export interface JestPlaywrightProjectConfig extends JestConfig.ProjectConfig {
+export type JestPlaywrightProjectConfig = Test['context']['config'] & {
   browserName: BrowserType
   wsEndpoint: WsEndpointType
   device: DeviceType
-  extensionsToTreatAsEsm: string[]
 }
 
-interface JestPlaywrightContext extends Context {
+export type JestPlaywrightContext = Omit<Test['context'], 'config'> & {
   config: JestPlaywrightProjectConfig
 }
 
-export interface JestPlaywrightTest extends Test {
+export type JestPlaywrightTest = Omit<Test, 'context'> & {
   context: JestPlaywrightContext
 }
 
@@ -238,6 +246,7 @@ export interface BrowserTest {
   browser: BrowserType
   wsEndpoint: WsEndpointType
   device: DeviceType
+  testTimeout?: number
 }
 
 export type ConfigParams = {
